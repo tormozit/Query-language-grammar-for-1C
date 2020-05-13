@@ -1,0 +1,988 @@
+﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
+"Version"       = '1.83' !08.05.2020
+"Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
+"About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
+
+"Character Mapping" = 'Unicode'
+"Case Sensitive"    = 'False'
+"Start Symbol"  = <Packet>
+
+!===============================
+! Charsets
+!===============================
+        
+{Quote}             = ['']
+{Letter Cyr}        = {Letter} + {Cyrillic}
+{Printable Cyr}     = {Printable} + {Cyrillic} + {&2116}
+{AlphaNumeric Cyr}  = {AlphaNumeric} + {Cyrillic}
+{NewLine}           = {CR} + {LF}
+{String Chars Double} = {Printable Cyr} + {Whitespace} - ["]
+{String Chars Single} = {Printable Cyr} + {Whitespace} - {Quote}   
+{CommentLine Chars}    = {Printable Cyr} + {Whitespace} - {NewLine}
+{ExtensionBlock Chars} = {Printable Cyr} + {Whitespace} - [}]
+{WhitespaceExceptEOL} = {Whitespace} - {NewLine}                       
+{Hex chars}     = {Number} + [A] + [B] + [C] + [D] + [E] + [F]
+{id First}      = {Letter Cyr} + [_] + [#]    ! # добавил для поддержки недокументированных возможностей, например имя временной таблицы может начинаться с него
+{id Tail}       = {id First} + {Number} + [$] ! $ добавил для поддержки ADO (EXCEL)
+{PrintableExceptSquareBracket} = {Printable Cyr} - ['['] - [']']
+
+!===============================
+! Terminals
+!===============================
+!Comment Line @= { Type = Noise }
+
+id                  = {id First}{id Tail}*
+strLiteral          = ('"' {String Chars Double}* '"')+ | N?({Quote} {String Chars Single}* {Quote})+ !Вариант с одной кавычкой добавлен для не 1С
+numLiteral          = {Number}+ ('.' {Number}*)? | 0x{Hex chars}+ | 0N !Варианты с 0x00001DF6 и 0N добавлены для не 1С
+refLiteral          = {Number}+ ':' {Hex chars}+ !SDBL
+BadID               = '[' {PrintableExceptSquareBracket}+ ']'
+Parameter           = '&' {id First}{id Tail}*     !Пришлось сделать терминалом из-за конфликтов при представлении в виде двух токенов
+                    | '@' {id First}{id Tail}*
+                    | '?' {id First}{id Tail}*
+                    | '?'
+
+CommentLine1 @= { Type = Noise } 
+CommentLine2 @= { Type = Noise } 
+CommentLine1 Line    = '//'
+CommentLine2 Line    = '--'
+
+ExtensionBlock Block  @= { Nesting = None, Advance = Character }
+CommentBlock Block @= { Nesting = None, Advance = Character }
+
+ExtensionBlock @= { Type = Noise }
+CommentBlock @= { Type = Noise }
+
+ExtensionBlock Start   = '{'
+ExtensionBlock End     = '}'
+
+CommentBlock Start  = '/*'
+CommentBlock End    = '*/' 
+               
+COMP_OPERATOR   = '>='|'<='|'<'|'>'|'<>'|'='
+
+ALL = 'ALL' | 'ВСЕ'
+ALLOWED = 'ALLOWED' | 'РАЗРЕШЕННЫЕ'
+AND = 'AND' | 'И'
+AS = 'AS' | 'КАК'
+ASC = 'ASC' | 'ВОЗР'
+AVG = 'AVG' | 'СРЕДНЕЕ'
+AUTOORDER = 'AUTOORDER' | 'АВТОУПОРЯДОЧИВАНИЕ'
+BEGINOFPERIOD = 'BEGINOFPERIOD' | 'НАЧАЛОПЕРИОДА'
+BETWEEN = 'BETWEEN' | 'МЕЖДУ'
+BOOLEAN = 'BOOLEAN' | 'БУЛЕВО'
+CASE = 'CASE' | 'ВЫБОР'
+CAST = 'CAST' | 'ВЫРАЗИТЬ'
+COUNT = 'COUNT' | 'КОЛИЧЕСТВО'
+DATE = 'DATE' | 'ДАТА'
+DATEADD = 'DATEADD' | 'ДОБАВИТЬКДАТЕ'
+DATEDIFF = 'DATEDIFF' | 'РАЗНОСТЬДАТ'
+DATETIME = 'DATETIME' | 'ДАТАВРЕМЯ'
+DAY = 'DAY' | 'ДЕНЬ'
+DAYOFWEEK = 'DAYOFWEEK' | 'ДЕНЬНЕДЕЛИ'
+DAYOFYEAR = 'DAYOFYEAR' | 'ДЕНЬГОДА'
+DESC = 'DESC' | 'УБЫВ'
+DISTINCT = 'DISTINCT' | 'РАЗЛИЧНЫЕ'
+DROP = 'DROP' | 'УНИЧТОЖИТЬ'
+ELSE = 'ELSE' | 'ИНАЧЕ'
+END = 'END' | 'КОНЕЦ'
+ENDOFPERIOD = 'ENDOFPERIOD' | 'КОНЕЦПЕРИОДА'
+ESCAPE = 'ESCAPE' | 'СПЕЦСИМВОЛ'
+EMPTYTABLE = 'EMPTYTABLE' | 'ПУСТАЯТАБЛИЦА'
+FALSE = 'FALSE' | 'ЛОЖЬ'
+FOR = 'FOR' | 'ДЛЯ'
+FROM = 'FROM' | 'ИЗ'
+FULL = 'FULL'|'ПОЛНОЕ'
+GROUP = 'GROUP'| 'СГРУППИРОВАТЬ'
+HAVING = 'HAVING' | 'ИМЕЮЩИЕ'
+HIERARCHY = 'HIERARCHY'
+HIERARCHYIN = 'ИЕРАРХИИ'
+HIERARCHYON = 'ИЕРАРХИЯ'
+HOUR = 'HOUR' | 'ЧАС'
+IN = 'IN' | 'В'
+INDEX = 'INDEX' | 'ИНДЕКСИРОВАТЬ'
+INNER = 'INNER'| 'ВНУТРЕННЕЕ'
+INTO = 'INTO' | 'ПОМЕСТИТЬ'
+IS = 'IS' | 'ЕСТЬ'
+ISNULL = 'ISNULL' | 'ЕСТЬNULL'
+JOIN = 'JOIN' | 'СОЕДИНЕНИЕ'
+LEFT = 'LEFT'| 'ЛЕВОЕ'
+LIKE = 'LIKE' | 'ПОДОБНО'
+MAX = 'MAX' | 'МАКСИМУМ'
+VALUE = 'VALUE' | 'ЗНАЧЕНИЕ'
+MIN = 'MIN' | 'МИНИМУМ'
+MINUTE = 'MINUTE' | 'МИНУТА'
+MONTH = 'MONTH' | 'МЕСЯЦ'
+NOT = 'NOT' | 'НЕ'
+NULL = 'NULL'
+NUMBER = 'NUMBER' | 'ЧИСЛО'
+ON = 'ON' | 'BY' | 'ПО'
+ONLY = 'ONLY' | 'ТОЛЬКО'
+OR = 'OR' | 'ИЛИ'
+ORDER = 'ORDER' | 'УПОРЯДОЧИТЬ'
+OUTER = 'OUTER'|'ВНЕШНЕЕ'
+PERIODS = 'PERIODS' | 'ПЕРИОДАМИ'
+PRESENTATION = 'PRESENTATION' | 'ПРЕДСТАВЛЕНИЕ'
+PRESENTATIONREFS = 'PRESENTATIONREFS' | 'ПРЕДСТАВЛЕНИЕССЫЛКИ'
+QUARTER = 'QUARTER' | 'КВАРТАЛ'
+RECORDAUTONUMBER = 'RECORDAUTONUMBER' | 'АВТОНОМЕРЗАПИСИ'
+REFS = 'REFS' | 'ССЫЛКА'
+RIGHT = 'RIGHT' | 'ПРАВОЕ'
+SECOND = 'SECOND' | 'СЕКУНДА'
+SELECT = 'SELECT' | 'ВЫБРАТЬ'
+STRING = 'STRING' | 'СТРОКА'
+SUBSTRING = 'SUBSTRING' | 'ПОДСТРОКА'
+SUM = 'SUM' | 'СУММА'
+TABLE = 'TABLE' !| 'ТАБЛИЦА' ! Русский вариант убрал, т.к. в 1С встречается "ПОМЕСТИТЬ Таблица" и возникает ошибка
+THEN = 'THEN' | 'ТОГДА'
+TOP = 'TOP' | 'ПЕРВЫЕ'
+TOTALS = 'TOTALS' | 'ИТОГИ'
+TRUE = 'TRUE' | 'ИСТИНА'
+TYPE = 'TYPE' | 'ТИП'
+UNDEFINED = 'UNDEFINED' | 'НЕОПРЕДЕЛЕНО'
+UNION = 'UNION' | 'ОБЪЕДИНИТЬ'
+UPDATE = 'UPDATE' | 'ИЗМЕНЕНИЯ'
+VALUETYPE = 'VALUETYPE' | 'ТИПЗНАЧЕНИЯ'
+WEEK = 'WEEK' | 'НЕДЕЛЯ'
+WHEN = 'WHEN' | 'КОГДА'
+WHERE = 'WHERE' | 'ГДЕ'
+YEAR = 'YEAR' | 'ГОД'
+
+!===============================
+! Rules
+!===============================
+
+<ID>        ::= id
+        |   BadID
+        |   ALL 
+        |   ALLOWED 
+        |   AND 
+        |   AS
+        |   ASC 
+        |   AVG
+        |   AUTOORDER 
+        |   BEGINOFPERIOD 
+        |   BETWEEN 
+        |   BIGINT
+        |   CASE 
+        |   CAST 
+        |   CHAR
+        |   COUNT 
+        |   DATE
+        |   DATEADD 
+        |   DATEDIFF 
+        |   DATETIME 
+        |   DAY
+        |   DAYOFWEEK 
+        |   DAYOFYEAR
+        |   DECIMAL
+        |   DESC 
+        |   DISTINCT 
+        |   DOUBLE
+        |   DROP 
+        |   ELSE 
+        |   EMPTYTABLE
+        |   END 
+        |   ENDOFPERIOD 
+        |   ESCAPE 
+        |   FALSE 
+        |   FLOAT
+        |   FOR 
+        |   FROM 
+        |   GROUP 
+        |   HIERARCHY
+        |   HIERARCHYIN 
+        |   HIERARCHYON
+        |   HOUR 
+        |   IN 
+        |   INNER
+        |   INT
+        |   INT64
+        |   INTEGER 
+        |   INTO 
+        |   IS 
+        |   ISNULL 
+        |   JOIN 
+        |   LEFT 
+        |   LIKE 
+        |   LONGTEXT
+        |   MAX 
+        |   MEDIUMTEXT
+        |   MIN 
+        |   MINUTE 
+        |   MONTH
+        |   MONEY 
+        |   NCHAR
+        |   NOT 
+        |   NTEXT
+        |   NVARCHAR
+        |   NULL 
+        |   NUMBER
+        |   NUMERIC
+        |   OF
+        |   ON 
+        |   ONLY 
+        |   OR 
+        |   ORDER 
+        |   OUTER 
+        |   PERIODS
+        |   PRESENTATION 
+        |   PRESENTATIONREFS 
+        |   QUARTER
+        |   REAL
+        |   REF
+        |   REFS
+        |   RIGHT 
+        |   SECOND 
+        |   SELECT
+        |   SMALLINT 
+        |   STRING
+        |   SUBSTRING 
+        |   SUM 
+        |   TABLE
+        |   TEXT
+        |   THEN
+        |   TIME
+        |   TIMESTAMP
+        |   TINYTEXT 
+        |   TOP 
+        |   TOTALS 
+        |   TRUE
+        |   TYPE
+        |   UNDEFINED 
+        |   UNION 
+        |   UPDATE
+        |   VALUE
+        |   VALUETYPE  
+        |   VARCHAR
+        |   WEEK 
+        |   WHEN 
+        |   WHERE 
+        |   YEAR
+
+<SmartID>   ::= id
+        |   BadID
+        |   BEGIN
+        |   BEGINOFPERIOD 
+        |   COUNT
+        |   DATE
+        |   DAY 
+        |   DATEADD 
+        |   DATEDIFF 
+        |   DATETIME
+        |   DAYOFWEEK 
+        |   DAYOFYEAR 
+        |   ELSE
+        |   END        
+        |   ENDOFPERIOD  
+        |   HOUR 
+        |   ISNULL 
+        |   MAX 
+        |   VALUE 
+        |   AVG 
+        |   MIN  
+        |   MINUTE 
+        |   MONTH 
+        |   NUMBER
+        !|   ORDER   !SHIFT-reduce conflict
+        |   PRESENTATION
+        |   PRESENTATIONREFS 
+        |   QUARTER
+        |   REF
+        |   REFS      !\\\\\\\\\\\\\
+        |   SECOND
+        !|   SELECT    !09.02.2014 SHIFT-reduce conflict
+        |   STRING
+        |   SUBSTRING
+        |   SUM 
+        |   TABLE
+        |   THEN
+        !|   TOTALS !17.02.2012 SHIFT-reduce conflict
+        |   TYPE
+        |   UPDATE
+        |   VALUETYPE 
+        |   WEEK
+        |   YEAR
+
+!Looks like the same as SmartID
+<TableAS>   ::= id
+        |   BadID
+        |   BEGIN
+        |   BEGINOFPERIOD 
+        |   COUNT
+        |   DATE
+        |   DAY 
+        |   DATEADD 
+        |   DATEDIFF 
+        |   DATETIME
+        |   DAYOFWEEK 
+        |   DAYOFYEAR 
+        |   ELSE
+        |   END
+        |   ENDOFPERIOD  
+        |   HOUR 
+        |   ISNULL 
+        |   MAX 
+        |   VALUE 
+        |   AVG 
+        |   MIN  
+        |   MINUTE 
+        |   MONTH 
+        |   NUMBER
+        |   ORDER
+        |   PRESENTATION
+        |   PRESENTATIONREFS 
+        |   QUARTER
+        |   REF
+        |   REFS
+        |   SECOND 
+        |   SELECT 
+        |   STRING
+        |   SUBSTRING
+        |   SUM
+        |   TABLE
+        |   TYPE
+        |   TOTALS !17.02.2012 SHIFT-reduce conflict
+        |   UPDATE
+        |   VALUETYPE
+        |   WEEK
+        |   YEAR
+
+<Packet>    ::= <Root>
+        |   <Root> ';'
+        |   <Root> ';' <Packet>
+                 
+<Root>      ::= <DropRoot>
+        |   <TruncateRoot>
+        |   <CreateRoot> 
+        |   <SelectRoot>
+        |   <InsertRoot>
+        |   <UpdateRoot>
+        |   <DeleteRoot>
+        |   <ExtRoot> ! This part is processed in second stage using prepared text gathered in first stage
+
+!!!!!!!!!!!!!!!!!!
+          
+<ExtRoot> ::= '#Root' numLiteral <ExtUnion> <ExtOrderTotalsOpt>          
+             
+<ExtUnion>   ::= 
+        | <ExtUnionPart> 
+        | <ExtUnionPart> <ExtUnionPart>    
+
+<ExtUnionPart> ::= '#UnionPart' numLiteral <ExtQuery>
+
+<ExtEmbeddedQuery> ::= '#EmbeddedQuery' numLiteral '(' <ExtEmbeddedRoot> ')'
+                   
+<ExtEmbeddedRoot> ::= <ExtUnion> <ExtOrderTotalsOpt>
+                           
+<ExtQuery> ::= <ExtQueryElement>
+        | <ExtQuery> <ExtDevider> <ExtQueryElement>              
+
+<ExtDevider> ::= 
+        |'##' 
+
+<ExtOrderTotalsOpt>::= 
+        | <ExtOrderTotals>
+        
+<ExtOrderTotals> ::= <ExtOrderTotalsElement>
+        | <ExtOrderTotals> <ExtDevider> <ExtOrderTotalsElement>
+                  
+<ExtQueryElement> ::= <ExtSelectElement>
+        |FROM <ChooseTablesOrJoins>
+        |<ExtEmbeddedQuery>
+        |<ExtWhereElement>
+
+<ExtSelectElement> ::= SELECT <ExtSelectExprs>
+                    
+<ExtWhereElement> ::= WHERE <ExtWhereExprs>
+
+<ExtOrderTotalsElement> ::= <ExtOrderElement>
+        |<ExtTotalsElement>
+        
+<ExtOrderElement> ::= ORDER ON <ExtOrderExprs> !May be speeded up by creating NamedFields
+
+<ExtTotalsElement> ::= TOTALS ON <ExtTotalsExprs> !May be speeded up by creating NamedFields
+
+<ExtSelectExprs>    ::= <ExtSelectExpr>
+        |  <ExtSelectExpr> ',' <ExtSelectExprs>
+        
+<ExtSelectExpr>    ::= <ExtNamedExpr>
+    
+<ExtWhereExprs>    ::= <ExtWhereExpr>
+        |  <ExtWhereExpr> ',' <ExtWhereExprs>
+        
+<ExtWhereExpr>    ::= <ExtNamedExpr>
+
+<ExtOrderExprs>    ::= <ExtOrderExpr>
+        |  <ExtOrderExpr> ',' <ExtOrderExprs>
+        
+<ExtOrderExpr>    ::= <ExtNamedExpr>
+
+<ExtTotalsExprs>    ::= <ExtTotalExpr>
+        |  <ExtTotalExpr> ',' <ExtTotalsExprs>
+        
+<ExtTotalExpr>    ::= <ExtNamedExpr>
+
+<ExtNamedExpr>    ::= <ExtExpr> <FieldPseudonameOpt> 
+                   
+<ExtExpr> ::= <Expr> <AllowChildOpt>
+
+<AllowChildOpt> ::=
+        | '.*'        
+         
+<FieldPseudonameOpt> ::= 
+        | <FieldPseudoname>
+                      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    
+<OptTable> ::=
+             | TABLE
+           
+<DropRoot>  ::=  DROP <OptTable> <TableName>
+
+<TruncateRoot>  ::=  TRUNCATE <OptTable> <TableName>
+
+<CreateRoot>   ::= <CreateUnion> <OrderLimitOffset> <IndexBy>
+               | <SelectUnion> <OrderLimitOffset> <Into> <IndexBy>   ! for Microsoft Visual FoxPro
+
+<UnionMode>  ::= 
+        | ALL
+        
+<UnionPart>  ::= UNION <UnionMode> <Union>
+
+<SimpleUnion>   ::= <Query> 
+        |   <Query> <UnionPart>
+
+<EmbeddedRoot>   ::= <SimpleUnion> <OrderLimitOffset>
+
+<Union> ::= <Query> 
+        |   <Query> <UnionPart>
+
+<CreateUnion>   ::= <CreateQuery> 
+        |   <CreateQuery> <UnionPart>
+
+<CreateQuery>   ::=  SELECT <AllowedDistinctTop> <SelectExprs> <Into> <FromTables> <Where> <GroupBy> <Having> <ForUpdate> 
+      
+<Into>      ::= INTO <OptTable> <TableName>
+
+<InsertRoot>   ::=  INSERT INTO  <SimpleTableName> <TableWith> <InsertFieldsPart> VALUES '(' <InsertExprs> ')'
+           |  INSERT INTO  <SimpleTableName> <TableWith> <InsertFieldsPart> <SelectUnion>
+
+<SimpleTableName> ::= id
+        |   id '.' <SimpleTableName>
+        
+<InsertExpr> ::= <Expr> 
+             
+<InsertExprs>   ::= <InsertExpr>
+        |   <InsertExpr> ',' <InsertExprs> 
+        
+<InsertFieldsPart> ::=
+             | '(' <InsertFields> ')'
+             
+<InsertFields> ::= <InsertField>
+              | <InsertField>','<InsertFields>
+             
+<InsertField>   ::= <Expr> 
+        
+<UpdateRoot>   ::=  UPDATE <TopOpt> <TableName> <TableWith> SET <SetExprs> <FromTables> <Where>
+                
+<SetExprs>    ::= <SetExpr>
+              | <SetExpr> ',' <SetExprs>
+             
+<SetExpr>     ::= <SetField> <SetValue>
+               | <SetField> <SetUnion>
+               
+<SetField>     ::= <Field>
+                |'(' <Expr>',' <Exprs>')'
+                
+<SetValue>     ::= COMP_OPERATOR <Expr>
+
+<SetUnion>     ::= COMP_OPERATOR <EmbeddedQuery>
+
+<DeleteRoot>   ::=  DELETE <TopOpt> <FromOpt> <TableName> <TableWith> <FromTables> <Where>
+                
+<FromOpt>      ::= 
+                | FROM 
+                 
+<SelectRoot>    ::= <SelectUnion> <OrderLimitOffset> <Totals> <AutoOrder> 
+
+<SelectUnion>   ::= <SelectQuery> 
+        |   <SelectQuery> <UnionPart>
+
+<SelectQuery>   ::=  SELECT <AllowedDistinctTop> <SelectExprs> <FromTables> <Where> <GroupBy> <Having> <ForUpdate>
+
+<Query> ::=  SELECT <DistinctTop> <SelectExprs> <FromTables> <Where> <GroupBy> <Having> <ForUpdate>
+
+<AllowedDistinctTop> ::=  
+                      | <Allowed>  <Distinct> <Top>
+                      | <Allowed>  <Top>      <Distinct>
+                      | <Allowed>  <Distinct>
+                      | <Allowed>  <Top>
+                      | <Allowed> 
+                      | <Distinct> <Allowed> <Top>
+                      | <Distinct> <Top>     <Allowed>
+                      | <Distinct> <Allowed>
+                      | <Distinct> <Top>
+                      | <Distinct> 
+                      | <Top>      <Allowed>  <Distinct>
+                      | <Top>      <Distinct> <Allowed>
+                      | <Top>      <Allowed>
+                      | <Top>      <Distinct>
+                      | <Top> 
+
+<DistinctTop>::= 
+               | <Distinct> <Top> 
+               | <Distinct>  
+               | <Top>      <Distinct>
+               | <Top>
+               
+<Allowed>   ::= ALLOWED
+
+<Distinct>  ::= DISTINCT
+
+<Top>       ::= TOP <NumberOrParameter>
+
+<TopOpt>    ::=
+             |<Top>
+
+<Limit>     ::=                    !Postrgre, SQLite
+             | LIMIT <NumberOrParameter>
+             | LIMIT ALL
+
+<NumberOrParameter> ::= numLiteral
+             | <Parameter>
+             
+<Offset>     ::=                   
+             | OFFSET <NumberOrParameter>    ! Postrge
+             | OFFSET <NumberOrParameter> <Rows>          ! MS SQL
+             | OFFSET <NumberOrParameter> <Rows> <Fetch>  ! MS SQL
+
+<Fetch>      ::= FETCH <FetchDir> <NumberOrParameter> <Rows> ONLY
+                                 
+<Rows>       ::= ROW 
+             | ROWS
+             
+<FetchDir>   ::= FIRST
+             | NEXT
+              
+<IndexExpr> ::=  <Expr> 
+        ! <Field> 
+             
+<IndexExprs>   ::= <IndexExpr>
+        |   <IndexExpr> ',' <IndexExprs> 
+        
+<IndexBy>   ::= 
+        |   INDEX ON <IndexExprs>
+
+<SelectExprs>   ::= <SelectExpr>
+        |   <SelectExpr> ',' <SelectExprs> 
+
+<FieldPseudoname> ::= <SmartID>
+        | AS <TableAS> 
+        
+<EmptyTableField> ::= 
+        | <FieldPseudoname>
+        
+<EmptyTableFields> ::= <EmptyTableField>
+        | <EmptyTableField> ',' <EmptyTableFields>
+        
+<EmptyTable> ::= EMPTYTABLE '.' '(' <EmptyTableFields> ')'
+              
+<SelectExpr>    ::=  <MultiField> 
+        |   <Expr> <FieldPseudonameOpt> 
+
+<FromTables>    ::=
+        |   FROM <ChooseTablesOrJoins>
+
+<ChooseTablesOrJoins> ::= <JoinSide>
+        |   <JoinSide> ',' <ChooseTablesOrJoins>
+       
+<JoinSide> ::= <TableWithName>
+        |    <Join>
+        !|    '(' <Join> ')'    !this rule blocks <FromUnion>
+                
+<Join>    ::= <JoinSide> <JoinType> JOIN <JoinSide> ON <Expr>              
+
+
+<TablePseudoname> ::= 
+        | <SmartID>
+        | AS <TableAS>        
+
+<TableWith> ::= 
+        | WITH '(' <ID>')'
+                  
+<TableWithName>  ::=  <Table> <TablePseudoname> <TableWith> 
+        | <FromUnion>
+
+<FromUnion> ::=  <EmbeddedQuery> <TablePseudoname> 
+
+<Table> ::= <TableParameter>
+        |   <TableName>
+
+<TableName> ::= id
+        |   id '.' <FieldBody>
+        |   BadID
+        ! <TableAS>
+        !|   <TableAS> '.' <FieldBody>   !Commented 26.11.2012
+
+<EmbeddedQuery>::=   '('<EmbeddedRoot>')'
+
+<HierarchyInOpt> ::=
+        | <HierarchyIn>
+        
+<Where> ::= 
+        |   WHERE  <Expr> 
+
+<GroupBy>   ::= 
+        |   GROUP ON <GroupExprs> 
+
+<GroupExprs> ::=
+        |   <GroupExpr>
+        |   <GroupExpr>','<GroupExprs>
+
+<GroupExpr> ::=  <Expr> 
+             
+<Having>    ::= 
+        |   HAVING  <Expr> 
+
+<TableNames> ::= <TableName>
+        |  <TableName> ',' <TableNames>
+        
+<ForUpdate> ::=
+        |   FOR UPDATE
+        |   FOR UPDATE <TableNames>
+        |   FOR UPDATE OF <TableNames>
+
+<OrderLimitOffset>::= <OrderBy> <Limit> <Offset>
+                   
+<OrderBy>   ::= 
+        |   ORDER ON <OrderExprs> 
+
+<OrderExprs>    ::= <OrderExpr>
+        |   <OrderExpr>','<OrderExprs>
+
+<OrderExpr> ::=  <Expr> <HierarchyOnOpt> <OrderDirectionOpt> 
+             
+<OrderDirectionOpt> ::=
+        | ASC
+        | DESC
+
+<HierarchyOnOpt> ::=
+        | <HierarchyOn>
+        
+<HierarchyOn>   ::=    HIERARCHY
+        |   HIERARCHYON
+
+<HierarchyIn>   ::=    HIERARCHY
+        |   HIERARCHYIN
+
+<Totals>    ::= 
+        |   TOTALS <AgregatExprs>
+        |   TOTALS ON <TotalsExprs>
+        |   TOTALS <AgregatExprs> ON <TotalsExprs>
+
+<AgregatExprs>    ::= <AgregatExpr>
+        |   <AgregatExpr> ',' <AgregatExprs>
+
+<AgregatExpr> ::=  <Expr> <FieldPseudonameOpt> 
+
+<TotalsExprs>   ::= <TotalsExpr>
+        |   <TotalsExpr>',' <TotalsExprs>
+
+<TotalsExpr>  ::=  <HierExpr> <FieldPseudonameOpt> 
+
+<HierExpr>  ::= <Expr> <HierMode>
+
+<HierMode> ::= 
+         | <HierarchyOn>
+         | ONLY <HierarchyOn>
+         | PERIODS'('<ID>','<Expr>','<Expr>')'
+               
+<AutoOrder>::=
+        |   AUTOORDER 
+
+<Exprs> ::= <Expr>
+        |   <Expr> ',' <Exprs>
+
+<NamedExprs>    ::= <NamedExpr>
+        |   <NamedExpr> ',' <NamedExprs>
+
+<NamedExpr> ::=  <Expr> <FieldPseudonameOpt> 
+
+!<GlobalExprs> ::= <GlobalExpr>
+!        |   <GlobalExpr> ',' <GlobalExprs>
+
+!<GlobalExpr> ::= <ConstExpr>
+!        | <Parameter>
+                      
+<ParametersOfTable> ::= <ParameterOfTable>
+        |   <ParameterOfTable> ',' <ParametersOfTable>
+
+<ParameterOfTable> ::= 
+        |  <Expr>
+        |  '(' <Expr>',' <Exprs>')'
+
+<JoinType>  ::= 
+        |   LEFT
+        |   LEFT OUTER
+        |   INNER
+        |   FULL
+        |   RIGHT
+        |   RIGHT OUTER
+
+<ConstExpr> ::= NULL
+        |   TRUE
+        |   FALSE
+        |   undefined
+        |   numLiteral
+        |   strLiteral
+        |   refLiteral
+        |   <Meaning>
+        |   <Datetime>
+
+<Meaning>   ::= VALUE'('<TableName>')'    
+
+<Datetime>  ::= DATETIME'('numLiteral',' numLiteral',' numLiteral')'
+        |   DATETIME'('numLiteral',' numLiteral',' numLiteral',' numLiteral',' numLiteral',' numLiteral')'
+
+<Parameter> ::= Parameter
+             !| '&' <ID>
+             !| '?' <ID> 
+             !| '@' <ID> 
+             
+<TableParameter>::= Parameter
+
+<Field> ::= <SmartID>
+!        |  <Brackets>  ! Commented 08.05.2020
+        |   <SmartID> '.' <FieldBody> !!! I don't understand why <FieldAS> is not working here.
+        |   <Func> '.' <FieldBody>
+        |   '('<Expr>')' '.' <FieldBody>    ! (ЕСТЬNULL(т.Ссылка, 0)).Код  , ВЫРАЗИТЬ(т.Ссылка КАК Справочник.Валюты).Код
+        |  <EmptyTable>
+
+<Brackets> ::= '(' <Expr> ')'
+            
+<FieldBody> ::=     <ID> 
+        |   <ID> '(' <ParametersOfTable> ')' 
+        |   <ID> '.' <FieldBody>
+        |   <ID> '(' <ParametersOfTable> ')' '.' <FieldBody>
+        |   '('<NamedExprs>')'
+        
+<MultiField>    ::= '*'
+         |   <SmartID> <MultiFieldBody>
+
+<MultiFieldBody> ::= '.*'
+         | '.' <ID> <MultiFieldBody>
+         
+<IsNull>    ::= ISNULL'('<Expr>','<Expr>')'
+
+<Cast>      ::= CAST'('<Expr> AS <TypeToCast>')'
+  
+<Convert>   ::= CONVERT'('<TypeToCast>','<TypeToCast>')'  !SQL
+
+<Round>     ::= ROUND'('<Expr>','<ConstExpr>')'  !SQL
+
+<Type>      ::= TYPE'('<TypeToCast>')'
+                        
+<DateAdd>   ::= DATEADD'('<Expr>','<Expr>','<Expr>')' !!! Carefull. Different langs have differnet meaning of params
+
+<DateDiff>  ::= DATEDIFF'('<Expr>','<Expr>','<Expr>')' !!! Carefull. Different langs have differnet meaning of params
+
+<BeginOfPeriod> ::=  BEGINOFPERIOD'('<Expr>')'
+        |   BEGINOFPERIOD'('<Expr>','<ID>')'
+
+<EndOfPeriod>   ::= ENDOFPERIOD'('<Expr>')'
+        |   ENDOFPERIOD'('<Expr>','<ID>')'
+
+<Substring>   ::=   SUBSTRING'('<Expr>','<Expr>','<Expr>')'
+
+<CaseExpr> ::= 
+            | <Expr>
+            
+<Case>      ::= CASE <CaseExpr> <WhenThen> <Else> END
+
+<WhenThen>  ::= WHEN <Expr> THEN <Expr>
+        |   WHEN <Expr> THEN <Expr> <WhenThen>
+
+<TypeSize> ::= <ConstExpr>
+            | max !SQL
+            
+<StringType> ::= <StringSubtype>
+        |   <StringSubtype> '('<TypeSize>')'
+          
+<StringSubtype> ::= STRING
+        | VARCHAR
+        | CHAR   
+        | NCHAR           
+        | NTEXT
+        | NVARCHAR
+        | TEXT
+        | LONGTEXT
+        | MEDIUMTEXT
+        | TINYTEXT
+
+<NumericType> ::= <NumericSubtype>
+        |   <NumericSubtype> '('<TypeSize>')'
+        |   <NumericSubtype> '('<ConstExpr>','<ConstExpr>')'        
+
+<NumericSubtype> ::= NUMBER        
+        | INT 
+        | INTEGER
+        | INT64
+        | SMALLINT
+        | MEDIUMINT
+        | BIGINT    
+        | DECIMAL
+        | REAL
+        | FLOAT
+        | MONEY   
+        | SMALLMONEY
+        | DOUBLE
+        | NUMERIC
+
+<DateType> ::= DATE
+        | DATETIME
+        | TIME
+        | TIMESTAMP
+        | SMALLDATETIME
+        
+<BinaryType> ::= BINARY
+            |  BINARY '('<TypeSize>')'
+                                           
+<TypeToCast> ::= BOOLEAN
+              | <DateType>
+              | <NumericType>
+              | <StringType>
+              | <BinaryType>
+              | <TableName>
+              | '('<TypeToCast>')'
+              |REF '('<TypeToCast>')'     ! SDBL
+
+<Else>      ::=
+        |   ELSE <Expr>
+
+<Count> ::= COUNT'('<Expr>')'
+        |   COUNT'(' DISTINCT <Expr> ')'
+        |   COUNT'(' '*' ')'
+        |   COUNT'(' DISTINCT '*' ')'
+
+<Agregate> ::= SUM'('<Expr>')'
+        |   MIN'('<Expr>')'
+        |   MAX'('<Expr>')'
+        |   AVG'('<Expr>')'
+        |   <Count>
+
+<Func0> ::= RECORDAUTONUMBER 
+        |   DB_ID  !SQL
+        |   DB_NAME !SQL
+
+<ZeroFunc>  ::= <Func0>'('')'
+
+<Func1> ::= DAY
+        |   DAYOFYEAR
+        |   DAYOFWEEK
+        |   DATALENGTH !SQL
+        |   HOUR
+        |   LEN        !SQL
+        |   LTRIM      !SQL
+        |   MINUTE
+        |   MONTH
+        |   OBJECT_NAME  !SQL
+        |   PRESENTATION
+        |   PRESENTATIONREFS
+        |   QUARTER
+        |   RTRIM      !SQL
+        |   SECOND
+        |   TRIM      !SQL
+        |   WEEK 
+        |   YEAR 
+        |   VALUETYPE
+        !|   TYPE
+
+<MonoFunc>  ::= <Func1>'('<Expr>')'
+
+<InOperator>    ::= IN
+        |   NOT IN
+
+!Expressions ===========================================
+
+<Expr>      ::=     <AndExpr1> 
+        |   <OrExpr> 
+        
+<OrExpr>    ::= <AndExpr1> OR <Expr> 
+             
+<AndExpr1>   ::=     <NotExpr1> 
+        |   <AndExpr>
+        
+<AndExpr>  ::= <NotExpr1> AND <AndExpr1>
+             
+<NotExpr1>     ::=   <CompareExpr> 
+        |   <NotExpr> 
+
+<NotExpr>   ::=  NOT <NotExpr1> 
+               
+<CompareExpr> ::=    <CheckExpr> 
+        |   <CheckExpr> COMP_OPERATOR <CompareExpr> 
+
+<CheckExpr> ::= <AddExpr>
+        |   '('<Expr> ',' <Exprs>')' <InOperation>
+        |   <CheckValueIn>
+        |   <AddExpr> BETWEEN <AddExpr> AND <AddExpr>
+        |   <CheckNULL>
+        |   <CheckNotNULL>
+        !|   <AddExpr> REFS <Field>   !Commented 26.11.2012
+        |   <AddExpr> REFS <TableName>
+        |   <CheckLIKE>
+        |   <AddExpr> LIKE <AddExpr> ESCAPE <AddExpr>
+        |   <Exists>
+        
+<CheckNULL> ::= <AddExpr> IS NULL
+             
+<CheckNotNULL> ::= <AddExpr> IS NOT NULL
+                
+<CheckLIKE> ::= <AddExpr> LIKE <AddExpr>
+
+<CheckValueIn>  ::= <AddExpr> <InOperation>
+
+<Exists>  ::= EXISTS <EmbeddedQuery>
+           
+<InOperation> ::= <InExprs>
+       |<InUnion>
+
+<InUnion> ::= <InOperator> <HierarchyInOpt> <EmbeddedQuery>
+
+<InExprs> ::= <InOperator> <HierarchyInOpt> '('<Exprs>')'
+             
+<AddExpr>     ::=   <MultExpr> 
+        |   <MultExpr> '+' <AddExpr> 
+        |   <MultExpr> '-' <AddExpr> 
+
+<MultExpr>      ::=     <UnarAddExpr> 
+                |       <UnarAddExpr> '*' <MultExpr> 
+                |       <UnarAddExpr> '/' <MultExpr> 
+
+<UnarAddExpr> ::=   <ValueOperand> 
+                |       '-' <ValueOperand> 
+
+<Func>      ::= <DateAdd>
+        |   <DateDiff>
+        |   <BeginOfPeriod>
+        |   <EndOfPeriod>
+        |   <Substring>
+        |   <MonoFunc>
+        |   <ZeroFunc>
+        |   <Cast>
+        |   <Convert> !SQL
+        |   <Round> !SQL
+        |   <Type>
+        |   <IsNull>
+        |   <Agregate>
+
+<ValueOperand> ::= <ConstExpr>
+        |   <Field>
+        |   <Brackets>
+        |   <Parameter>
+        |   <Case>
+        |   <Func>
+
+
+
+
