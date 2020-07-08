@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.83' !08.05.2020
+"Version"       = '1.84' !14.06.2020
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -78,7 +78,6 @@ DATEADD = 'DATEADD' | 'ДОБАВИТЬКДАТЕ'
 DATEDIFF = 'DATEDIFF' | 'РАЗНОСТЬДАТ'
 DATETIME = 'DATETIME' | 'ДАТАВРЕМЯ'
 DAY = 'DAY' | 'ДЕНЬ'
-DAYOFWEEK = 'DAYOFWEEK' | 'ДЕНЬНЕДЕЛИ'
 DAYOFYEAR = 'DAYOFYEAR' | 'ДЕНЬГОДА'
 DESC = 'DESC' | 'УБЫВ'
 DISTINCT = 'DISTINCT' | 'РАЗЛИЧНЫЕ'
@@ -143,6 +142,7 @@ UNION = 'UNION' | 'ОБЪЕДИНИТЬ'
 UPDATE = 'UPDATE' | 'ИЗМЕНЕНИЯ'
 VALUETYPE = 'VALUETYPE' | 'ТИПЗНАЧЕНИЯ'
 WEEK = 'WEEK' | 'НЕДЕЛЯ'
+WEEKDAY = 'WEEKDAY' | 'ДЕНЬНЕДЕЛИ'
 WHEN = 'WHEN' | 'КОГДА'
 WHERE = 'WHERE' | 'ГДЕ'
 YEAR = 'YEAR' | 'ГОД'
@@ -172,7 +172,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   DATEDIFF 
         |   DATETIME 
         |   DAY
-        |   DAYOFWEEK 
+        |   WEEKDAY 
         |   DAYOFYEAR
         |   DECIMAL
         |   DESC 
@@ -269,7 +269,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   DATEADD 
         |   DATEDIFF 
         |   DATETIME
-        |   DAYOFWEEK 
+        |   WEEKDAY 
         |   DAYOFYEAR 
         |   ELSE
         |   END        
@@ -314,7 +314,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   DATEADD 
         |   DATEDIFF 
         |   DATETIME
-        |   DAYOFWEEK 
+        |   WEEKDAY 
         |   DAYOFYEAR 
         |   ELSE
         |   END
@@ -878,7 +878,7 @@ YEAR = 'YEAR' | 'ГОД'
 
 <Func1> ::= DAY
         |   DAYOFYEAR
-        |   DAYOFWEEK
+        |   WEEKDAY
         |   DATALENGTH !SQL
         |   HOUR
         |   LEN        !SQL
