@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.85' !19.03.2021
+"Version"       = '1.86' !21.03.2021
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -360,15 +360,15 @@ YEAR = 'YEAR' | 'ГОД'
         |   <DeleteRoot>
         |   <ExtRoot> ! This part is processed in second stage using prepared text gathered in first stage
 
-!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!! 1C Query lang extension helper syntax
           
-<ExtRoot> ::= '#Root' numLiteral <ExtUnion> <ExtOrderTotalsOpt>          
-             
-<ExtUnion>   ::= 
-        | <ExtUnionPart> 
-        | <ExtUnionPart> <ExtUnionPart>    
+<ExtRoot> ::= '#Root' numLiteral <ExtOrderTotalsOpt>
+        | '#Root' numLiteral <ExtUnionPart> <ExtOrderTotalsOpt>             
 
-<ExtUnionPart> ::= '#UnionPart' numLiteral <ExtQuery>
+<ExtUnion>   ::= <ExtQuery>
+        | <ExtQuery> <ExtUnionPart>    
+
+<ExtUnionPart> ::= '#UnionPart' numLiteral <ExtUnion>
 
 <ExtEmbeddedQuery> ::= '#EmbeddedQuery' numLiteral '(' <ExtEmbeddedRoot> ')'
                    
