@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.88' !08.10.2021
+"Version"       = '1.89' !05.01.2022
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -73,6 +73,7 @@ BOOLEAN = 'BOOLEAN' | 'БУЛЕВО'
 CASE = 'CASE' | 'ВЫБОР'
 CAST = 'CAST' | 'ВЫРАЗИТЬ'
 COUNT = 'COUNT' | 'КОЛИЧЕСТВО'
+DATASIZE = 'DATASIZE' | 'РАЗМЕРХРАНИМЫХДАННЫХ' ! 1С Английский вариант не найден пока
 DATE = 'DATE' | 'ДАТА'
 DATEADD = 'DATEADD' | 'ДОБАВИТЬКДАТЕ'
 DATEDIFF = 'DATEDIFF' | 'РАЗНОСТЬДАТ'
@@ -100,14 +101,15 @@ HOUR = 'HOUR' | 'ЧАС'
 IN = 'IN' | 'В'
 INDEX = 'INDEX' | 'ИНДЕКСИРОВАТЬ'
 INNER = 'INNER'| 'ВНУТРЕННЕЕ'
+INT = 'INT' | 'ЦЕЛ'
 INTO = 'INTO' | 'ПОМЕСТИТЬ'
 IS = 'IS' | 'ЕСТЬ'
 ISNULL = 'ISNULL' | 'ЕСТЬNULL'
 JOIN = 'JOIN' | 'СОЕДИНЕНИЕ'
 LEFT = 'LEFT'| 'ЛЕВОЕ'
 LIKE = 'LIKE' | 'ПОДОБНО'
+LOWER = 'LOWER' | 'НРЕГ'
 MAX = 'MAX' | 'МАКСИМУМ'
-VALUE = 'VALUE' | 'ЗНАЧЕНИЕ'
 MIN = 'MIN' | 'МИНИМУМ'
 MINUTE = 'MINUTE' | 'МИНУТА'
 MONTH = 'MONTH' | 'МЕСЯЦ'
@@ -126,20 +128,31 @@ QUARTER = 'QUARTER' | 'КВАРТАЛ'
 RECORDAUTONUMBER = 'RECORDAUTONUMBER' | 'АВТОНОМЕРЗАПИСИ'
 REFS = 'REFS' | 'ССЫЛКА'
 RIGHT = 'RIGHT' | 'ПРАВОЕ'
+ROUND = 'ROUND' | 'ОКР'
 SECOND = 'SECOND' | 'СЕКУНДА'
 SELECT = 'SELECT' | 'ВЫБРАТЬ'
 STRING = 'STRING' | 'СТРОКА'
+STRINGLENGTH = 'STRINGLENGTH' | 'ДЛИНАСТРОКИ'
+STRFIND = 'STRFIND' | 'СТРНАЙТИ'
+STRLEFT = 'ЛЕВ' ! Английский вариант пока отключил из-за конфликтов 'LEFT'
+STRREPLACE = 'STRREPLACE' | 'СТРЗАМЕНИТЬ'
+STRRIGHT = 'ПРАВ' ! Английский вариант пока отключил из-за конфликтов'RIGHT'
 SUBSTRING = 'SUBSTRING' | 'ПОДСТРОКА'
 SUM = 'SUM' | 'СУММА'
 TABLE = 'TABLE' !| 'ТАБЛИЦА' ! Русский вариант убрал, т.к. в 1С встречается "ПОМЕСТИТЬ Таблица" и возникает ошибка
 THEN = 'THEN' | 'ТОГДА'
 TOP = 'TOP' | 'ПЕРВЫЕ'
 TOTALS = 'TOTALS' | 'ИТОГИ'
+TRIMALL = 'TRIMALL' | 'СОКРЛП'
+TRIML = 'TRIML' | 'СОКРЛ'
+TRIMR = 'TRIMR' | 'СОКРП'
 TRUE = 'TRUE' | 'ИСТИНА'
 TYPE = 'TYPE' | 'ТИП'
 UNDEFINED = 'UNDEFINED' | 'НЕОПРЕДЕЛЕНО'
 UNION = 'UNION' | 'ОБЪЕДИНИТЬ'
 UPDATE = 'UPDATE' | 'ИЗМЕНЕНИЯ'
+UPPER = 'UPPER' | 'ВРЕГ'
+VALUE = 'VALUE' | 'ЗНАЧЕНИЕ'
 VALUETYPE = 'VALUETYPE' | 'ТИПЗНАЧЕНИЯ'
 WEEK = 'WEEK' | 'НЕДЕЛЯ'
 WEEKDAY = 'WEEKDAY' | 'ДЕНЬНЕДЕЛИ'
@@ -167,6 +180,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   CAST 
         |   CHAR
         |   COUNT 
+        |   DATASIZE
         |   DATE
         |   DATEADD 
         |   DATEDIFF 
@@ -232,10 +246,16 @@ YEAR = 'YEAR' | 'ГОД'
         |   REF
         |   REFS
         |   RIGHT 
+        |   ROUND
         |   SECOND 
         |   SELECT
         |   SMALLINT 
+        |   STRFIND
         |   STRING
+        |   STRINGLENGTH
+        |   STRLEFT
+        |   STRREPLACE
+        |   STRRIGHT
         |   SUBSTRING 
         |   SUM 
         |   TABLE
@@ -246,6 +266,9 @@ YEAR = 'YEAR' | 'ГОД'
         |   TINYTEXT 
         |   TOP 
         |   TOTALS 
+        |   TRIMALL
+        |   TRIML
+        |   TRIMR
         |   TRUE
         |   TYPE
         |   UNDEFINED 
@@ -874,28 +897,56 @@ YEAR = 'YEAR' | 'ГОД'
 
 <ZeroFunc>  ::= <Func0>'('')'
 
-<Func1> ::= DAY
+<Func1> ::= ACOS
+        |   ASIN
+        |   ATAN
+        |   COS
+        |   DATASIZE
+        |   DAY
         |   DAYOFYEAR
-        |   WEEKDAY
         |   DATALENGTH !SQL
+        |   EXP
         |   HOUR
+        |   INT
         |   LEN        !SQL
         |   LTRIM      !SQL
+        |   LOG
+        |   LOG10
+        |   LOWER
         |   MINUTE
         |   MONTH
         |   OBJECT_NAME  !SQL
+        |   POW
         |   PRESENTATION
         |   PRESENTATIONREFS
         |   QUARTER
         |   RTRIM      !SQL
         |   SECOND
+        |   SIN
+        |   SQRT
+        |   STRING
+        |   STRINGLENGTH
+        |   TAN
+        |   TRIMALL
+        |   TRIML
+        |   TRIMR
         |   TRIM      !SQL
         |   WEEK 
+        |   WEEKDAY
         |   YEAR 
+        |   UPPER
         |   VALUETYPE
         !|   TYPE
 
 <MonoFunc>  ::= <Func1>'('<Expr>')'
+
+<OtherFunc1> ::= ROUND
+        |      STRFIND
+        |      STRLEFT
+        |      STRREPLACE
+        |      STRRIGHT
+
+<OtherFunc>  ::= <OtherFunc1>'(' <Exprs> ')'
 
 <InOperator>    ::= IN
         |   NOT IN
@@ -966,6 +1017,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   <EndOfPeriod>
         |   <Substring>
         |   <MonoFunc>
+        |   <OtherFunc>
         |   <ZeroFunc>
         |   <Cast>
         |   <Convert> !SQL
