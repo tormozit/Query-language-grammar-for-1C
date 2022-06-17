@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.90' !13.05.2022
+"Version"       = '1.91' !17.06.2022
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -152,6 +152,7 @@ UNDEFINED = 'UNDEFINED' | 'НЕОПРЕДЕЛЕНО'
 UNION = 'UNION' | 'ОБЪЕДИНИТЬ'
 UPDATE = 'UPDATE' | 'ИЗМЕНЕНИЯ'
 UPPER = 'UPPER' | 'ВРЕГ'
+UUID = 'UUID' | 'УНИКАЛЬНЫЙИДЕНТИФИКАТОР'
 VALUE = 'VALUE' | 'ЗНАЧЕНИЕ'
 VALUETYPE = 'VALUETYPE' | 'ТИПЗНАЧЕНИЯ'
 WEEK = 'WEEK' | 'НЕДЕЛЯ'
@@ -275,6 +276,8 @@ YEAR = 'YEAR' | 'ГОД'
         |   UNDEFINED 
         |   UNION 
         |   UPDATE
+        |   UPPER
+        |   UUID
         |   VALUE
         |   VALUETYPE  
         |   VARCHAR
@@ -323,6 +326,8 @@ YEAR = 'YEAR' | 'ГОД'
         !|   TOTALS !17.02.2012 SHIFT-reduce conflict
         |   TYPE
         |   UPDATE
+        |   UPPER
+        |   UUID
         |   VALUETYPE 
         |   WEEK
         |   YEAR
@@ -367,6 +372,8 @@ YEAR = 'YEAR' | 'ГОД'
         |   TYPE
         |   TOTALS !17.02.2012 SHIFT-reduce conflict
         |   UPDATE
+        |   UPPER
+        |   UUID
         |   VALUETYPE
         |   WEEK
         |   YEAR
@@ -936,6 +943,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   WEEKDAY
         |   YEAR 
         |   UPPER
+        |   UUID
         |   VALUETYPE
         !|   TYPE
 
