@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.91' !17.06.2022
+"Version"       = '1.92' !14.08.2022
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -32,7 +32,9 @@
 !Comment Line @= { Type = Noise }
 
 id                  = {id First}{id Tail}*
-strLiteral          = ('"' {String Chars Double}* '"')+ | N?({Quote} {String Chars Single}* {Quote})+ !Вариант с одной кавычкой добавлен для не 1С
+strLiteral          = ('"' {String Chars Double}* '"')+ 
+                    | N?({Quote} {String Chars Single}* {Quote}) !Вариант с одной кавычкой добавлен для не 1С
+varLiteral          = {Quote} {String Chars Single}* {Quote} ('::' {id First}{id Tail}*) ! Postre SQL, после добавления этого терминала последняя стадия сборки EGT стала сильно дольше
 numLiteral          = {Number}+ ('.' {Number}*)? | 0x{Hex chars}+ | 0N !Варианты с 0x00001DF6 и 0N добавлены для не 1С
 refLiteral          = {Number}+ ':' {Hex chars}+ !SDBL
 BadID               = '[' {PrintableExceptSquareBracket}+ ']'
@@ -764,6 +766,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   undefined
         |   numLiteral
         |   strLiteral
+        |   varLiteral
         |   refLiteral
         |   <Meaning>
         |   <Datetime>
@@ -840,6 +843,7 @@ YEAR = 'YEAR' | 'ГОД'
 <StringSubtype> ::= STRING
         | VARCHAR
         | CHAR   
+        | MVARCHAR
         | NCHAR           
         | NTEXT
         | NVARCHAR
@@ -899,13 +903,13 @@ YEAR = 'YEAR' | 'ГОД'
         |   AVG'('<Expr>')'
         |   <Count>
 
-<Func0> ::= RECORDAUTONUMBER 
+<ZeroFuncName> ::= RECORDAUTONUMBER 
         |   DB_ID  !SQL
         |   DB_NAME !SQL
 
-<ZeroFunc>  ::= <Func0>'('')'
+<ZeroFunc>  ::= <ZeroFuncName> '('')'
 
-<Func1> ::= ACOS
+<MonoFuncName> ::= ACOS
         |   ASIN
         |   ATAN
         |   COS
@@ -947,15 +951,17 @@ YEAR = 'YEAR' | 'ГОД'
         |   VALUETYPE
         !|   TYPE
 
-<MonoFunc>  ::= <Func1>'('<Expr>')'
+<MonoFunc>  ::= <MonoFuncName> '('<Expr>')'
 
-<OtherFunc1> ::= ROUND
-        |      STRFIND
-        |      STRLEFT
-        |      STRREPLACE
-        |      STRRIGHT
+<OtherFuncName> ::= COALESCE !SQL
+        |  ROUND
+        |  STRFIND
+        |  STRLEFT
+        |  STRREPLACE
+        |  STRRIGHT
+        |  SUBSTR !SQL
 
-<OtherFunc>  ::= <OtherFunc1>'(' <Exprs> ')'
+<OtherFunc>  ::= <OtherFuncName> '(' <Exprs> ')'
 
 <InOperator>    ::= IN
         |   NOT IN
@@ -965,7 +971,8 @@ YEAR = 'YEAR' | 'ГОД'
 <Expr>      ::=     <AndExpr1> 
         |   <OrExpr> 
         
-<OrExpr>    ::= <AndExpr1> OR <Expr> 
+<OrExpr>    ::= <AndExpr1> OR <Expr>
+        | <AndExpr1> '||' <Expr> ! Postgre 
              
 <AndExpr1>   ::=     <NotExpr1> 
         |   <AndExpr>
