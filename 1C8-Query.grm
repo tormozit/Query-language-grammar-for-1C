@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.92' !14.08.2022
+"Version"       = '1.93' !18.08.2022
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -34,7 +34,6 @@
 id                  = {id First}{id Tail}*
 strLiteral          = ('"' {String Chars Double}* '"')+ 
                     | N?({Quote} {String Chars Single}* {Quote}) !Вариант с одной кавычкой добавлен для не 1С
-varLiteral          = {Quote} {String Chars Single}* {Quote} ('::' {id First}{id Tail}*) ! Postre SQL, после добавления этого терминала последняя стадия сборки EGT стала сильно дольше
 numLiteral          = {Number}+ ('.' {Number}*)? | 0x{Hex chars}+ | 0N !Варианты с 0x00001DF6 и 0N добавлены для не 1С
 refLiteral          = {Number}+ ':' {Hex chars}+ !SDBL
 BadID               = '[' {PrintableExceptSquareBracket}+ ']'
@@ -228,7 +227,8 @@ YEAR = 'YEAR' | 'ГОД'
         |   MIN 
         |   MINUTE 
         |   MONTH
-        |   MONEY 
+        |   MONEY
+        |   MVARCHAR 
         |   NCHAR
         |   NOT 
         |   NTEXT
@@ -972,7 +972,6 @@ YEAR = 'YEAR' | 'ГОД'
         |   <OrExpr> 
         
 <OrExpr>    ::= <AndExpr1> OR <Expr>
-        | <AndExpr1> '||' <Expr> ! Postgre 
              
 <AndExpr1>   ::=     <NotExpr1> 
         |   <AndExpr>
@@ -1019,6 +1018,7 @@ YEAR = 'YEAR' | 'ГОД'
 <AddExpr>     ::=   <MultExpr> 
         |   <MultExpr> '+' <AddExpr> 
         |   <MultExpr> '-' <AddExpr> 
+        |   <MultExpr> '||' <AddExpr> ! Postre SQL concat
 
 <MultExpr>      ::=     <UnarAddExpr> 
                 |       <UnarAddExpr> '*' <MultExpr> 
@@ -1042,13 +1042,14 @@ YEAR = 'YEAR' | 'ГОД'
         |   <IsNull>
         |   <Agregate>
 
-<ValueOperand> ::= <ConstExpr>
+<ValueOperand1> ::= <ConstExpr>
         |   <Field>
         |   <Brackets>
         |   <Parameter>
         |   <Case>
         |   <Func>
 
-
+<ValueOperand>::= <ValueOperand1>
+        |   <ValueOperand1> '::' <ID>   ! Postre SQL cast
 
 
