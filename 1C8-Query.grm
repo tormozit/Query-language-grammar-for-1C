@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '1.96' !15.08.2023
+"Version"       = '1.97' !01.07.2024
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -61,6 +61,7 @@ CommentBlock End    = '*/'
                
 COMP_OPERATOR   = '>='|'<='|'<'|'>'|'<>'|'='
 
+ADD = 'ADD' | 'ДОБАВИТЬ'
 ALL = 'ALL' | 'ВСЕ'
 ALLOWED = 'ALLOWED' | 'РАЗРЕШЕННЫЕ'
 AND = 'AND' | 'И'
@@ -168,6 +169,7 @@ YEAR = 'YEAR' | 'ГОД'
 
 <ID>        ::= id
         |   BadID
+        |   ADD
         |   ALL 
         |   ALLOWED 
         |   AND 
@@ -386,7 +388,8 @@ YEAR = 'YEAR' | 'ГОД'
                  
 <Root>      ::= <DropRoot>
         |   <TruncateRoot>
-        |   <CreateRoot> 
+        |   <CreateRoot>
+        |   <AddRoot> 
         |   <SelectRoot>
         |   <InsertRoot>
         |   <UpdateRoot>
@@ -473,7 +476,7 @@ YEAR = 'YEAR' | 'ГОД'
 <TruncateRoot>  ::=  TRUNCATE <OptTable> <TableName>
 
 <CreateRoot>   ::= <CreateUnion> <OrderLimitOffset> <IndexBy>
-               | <SelectUnion> <OrderLimitOffset> <Into> <IndexBy>   ! for Microsoft Visual FoxPro
+               | <SelectUnion> <OrderLimitOffset> <IntoCreate> <IndexBy>   ! for Microsoft Visual FoxPro
 
 <UnionMode>  ::= 
         | ALL
@@ -490,11 +493,20 @@ YEAR = 'YEAR' | 'ГОД'
 
 <CreateUnion>   ::= <CreateQuery> 
         |   <CreateQuery> <UnionPart>
+        
+<AddRoot>   ::= <AddQuery>
+             | <AddUnion>
+        
+<AddUnion>   ::= <AddQuery> <UnionPart>
+                
+<CreateQuery>   ::=  SELECT <AllowedDistinctTop> <SelectExprs> <IntoCreate> <FromTables> <Where> <GroupBy> <Having> <ForUpdate> 
 
-<CreateQuery>   ::=  SELECT <AllowedDistinctTop> <SelectExprs> <Into> <FromTables> <Where> <GroupBy> <Having> <ForUpdate> 
+<AddQuery>   ::=  SELECT <AllowedDistinctTop> <SelectExprs> <IntoAdd> <FromTables> <Where> <GroupBy> <Having> <ForUpdate> 
       
-<Into>      ::= INTO <OptTable> <TableName>
+<IntoCreate> ::= INTO <OptTable> <TableName>
 
+<IntoAdd>    ::= ADD <OptTable> <TableName>
+             
 <InsertRoot>   ::=  INSERT INTO  <SimpleTableName> <TableWith> <InsertFieldsPart> VALUES '(' <InsertExprs> ')'
            |  INSERT INTO  <SimpleTableName> <TableWith> <InsertFieldsPart> <SelectUnion>
 
