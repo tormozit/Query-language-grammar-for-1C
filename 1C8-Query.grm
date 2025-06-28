@@ -1,5 +1,5 @@
 ﻿"Name"          = 'Multi SQL (1C:Enterprise 8.2+, 1C DBV8Eng, 1C SDBL, Oracle SQL, MS SQL, MS Jet, WQL, My SQL, MS Visual Fox Pro, Postgre SQL)'
-"Version"       = '2.0' !25.03.2025
+"Version"       = '2.1' !27.06.2025
 "Author"        = 'Starykh Sergey aka tormozit, skype:tormozit, mail:tormozit@mail.ru'
 "About"         = 'Multi SQL (1C:Enterprise 8.2+ Query language with linked comment support, SQL for Oracle, SQL for MS SQL, MS Jet) grammar (en/ru versions) for Gold Parser Builder >= 5.0. http://devtool1c.ucoz.ru/load/grammatika_jazyka_zaprosov_1s_8_2_goldparser/1-1-0-4'
 
@@ -133,6 +133,7 @@ RIGHT = 'RIGHT' | 'ПРАВОЕ'
 ROUND = 'ROUND' | 'ОКР'
 SECOND = 'SECOND' | 'СЕКУНДА'
 SELECT = 'SELECT' | 'ВЫБРАТЬ'
+SETS = 'SETS' | 'НАБОРАМ'
 STRING = 'STRING' | 'СТРОКА'
 STRINGLENGTH = 'STRINGLENGTH' | 'ДЛИНАСТРОКИ'
 STRFIND = 'STRFIND' | 'СТРНАЙТИ'
@@ -152,6 +153,7 @@ TRUE = 'TRUE' | 'ИСТИНА'
 TYPE = 'TYPE' | 'ТИП'
 UNDEFINED = 'UNDEFINED' | 'НЕОПРЕДЕЛЕНО'
 UNION = 'UNION' | 'ОБЪЕДИНИТЬ'
+UNIQUE = 'UNIQUE' | 'УНИКАЛЬНО'
 UPDATE = 'UPDATE' | 'ИЗМЕНЕНИЯ'
 UPPER = 'UPPER' | 'ВРЕГ'
 UUID = 'UUID' | 'УНИКАЛЬНЫЙИДЕНТИФИКАТОР'
@@ -255,7 +257,8 @@ YEAR = 'YEAR' | 'ГОД'
         |   ROUND
         |   SECOND 
         |   SELECT
-        |   SMALLINT 
+        |   SETS
+        |   SMALLINT   
         |   STRFIND
         |   STRING
         |   STRINGLENGTH
@@ -279,6 +282,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   TYPE
         |   UNDEFINED 
         |   UNION 
+        |   UNIQUE
         |   UPDATE
         |   UPPER
         |   UUID
@@ -322,6 +326,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   REFS      !\\\\\\\\\\\\\
         |   SECOND
         !|   SELECT    !09.02.2014 SHIFT-reduce conflict
+        |   SETS
         |   STRING
         |   SUBSTRING
         |   SUM 
@@ -329,6 +334,7 @@ YEAR = 'YEAR' | 'ГОД'
         |   THEN
         !|   TOTALS !17.02.2012 SHIFT-reduce conflict
         |   TYPE
+        |   UNIQUE
         |   UPDATE
         |   UPPER
         |   UUID
@@ -369,12 +375,14 @@ YEAR = 'YEAR' | 'ГОД'
         |   REFS
         |   SECOND 
         |   SELECT 
+        |   SETS
         |   STRING
         |   SUBSTRING
         |   SUM
         |   TABLE
         |   TYPE
         |   TOTALS !17.02.2012 SHIFT-reduce conflict
+        |   UNIQUE
         |   UPDATE
         |   UPPER
         |   UUID
@@ -611,10 +619,18 @@ YEAR = 'YEAR' | 'ГОД'
              
 <IndexExprs>   ::= <IndexExpr>
         |   <IndexExpr> ',' <IndexExprs> 
-        
+
+<IndexSet> ::= '(' <IndexExprs> ')' <UniqueOpt>
+
+<UniqueOpt> ::= 
+        | UNIQUE
+                 
+<IndexSets>   ::= <IndexSet>
+        | <IndexSet> ',' <IndexSets>
 <IndexBy>   ::= 
         |   INDEX ON <IndexExprs>
-
+        |   INDEX ON SETS '(' <IndexSets> ')'
+        
 <SelectExprs>   ::= <SelectExpr>
         |   <SelectExpr> ',' <SelectExprs> 
 
